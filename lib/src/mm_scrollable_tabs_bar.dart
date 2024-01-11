@@ -3,13 +3,15 @@ part of '../mm_scrollable_tabs.dart';
 class MMScrollableTabsBar<T> extends StatefulWidget {
   const MMScrollableTabsBar({
     super.key,
-    this.scrollController,
     required this.controller,
     required this.buildTabWidget,
+    this.firstItemLeftPadding = 0,
+    this.lastItemRightPadding = 0,
   });
 
   final MMScrollableTabsController<T> controller;
-  final ScrollController? scrollController;
+  final double firstItemLeftPadding;
+  final double lastItemRightPadding;
   final Widget Function(
     MMScrollableTabsItem<T> tab,
     bool active,
@@ -23,19 +25,26 @@ class _MMScrollableTabsBarState<T> extends State<MMScrollableTabsBar<T>> {
   late final ScrollController tabScrollController;
   bool autoScrolling = false;
   MMScrollableTabsItem<T>? active;
+  NestedScrollViewState? nestedScrollViewState;
 
   @override
   void initState() {
     tabScrollController = ScrollController();
     widget.controller._tabBarState = this;
-    widget.scrollController?.addListener(contentScrollToTabScrollListener);
+    nestedScrollViewState =
+        context.findAncestorStateOfType<NestedScrollViewState>();
+    nestedScrollViewState?.innerController.addListener(
+      contentScrollToTabScrollListener,
+    );
 
     super.initState();
   }
 
   @override
   void dispose() {
-    widget.scrollController?.removeListener(contentScrollToTabScrollListener);
+    nestedScrollViewState?.innerController.removeListener(
+      contentScrollToTabScrollListener,
+    );
     tabScrollController.dispose();
     super.dispose();
   }
@@ -45,12 +54,13 @@ class _MMScrollableTabsBarState<T> extends State<MMScrollableTabsBar<T>> {
   }
 
   void contentScrollToTabScrollListener() {
-    final maxContentOffset = widget.scrollController!.position.maxScrollExtent;
+    final scrollController = nestedScrollViewState!.innerController;
+    final maxContentOffset = scrollController.position.maxScrollExtent;
     final maxTabOffset = tabScrollController.position.maxScrollExtent;
 
     if (maxContentOffset < maxTabOffset) return;
 
-    final contentOffset = widget.scrollController!.offset;
+    final contentOffset = scrollController.offset;
 
     // Map the content offset to the tab offset
     final tabOffset = maxTabOffset * (contentOffset / maxContentOffset);
@@ -59,19 +69,26 @@ class _MMScrollableTabsBarState<T> extends State<MMScrollableTabsBar<T>> {
 
   @override
   Widget build(BuildContext context) {
+    final children = <Widget>[];
+    children.add(
+      SizedBox(width: widget.firstItemLeftPadding),
+    );
+    children.addAll(widget.controller.tabs.map((tab) {
+      return GestureDetector(
+        onTap: () {
+          widget.controller._autoScrollToTab(tab);
+        },
+        child: widget.buildTabWidget(tab, active?.key == tab.key),
+      );
+    }).toList());
+
+    children.add(
+      SizedBox(width: widget.lastItemRightPadding),
+    );
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       controller: tabScrollController,
-      child: Row(
-        children: widget.controller.tabs.map((tab) {
-          return GestureDetector(
-            onTap: () {
-              widget.controller._autoScrollToTab(tab);
-            },
-            child: widget.buildTabWidget(tab, active?.key == tab.key),
-          );
-        }).toList(),
-      ),
+      child: Row(children: children),
     );
   }
 }

@@ -28,6 +28,35 @@ class MyApp extends StatelessWidget {
   }
 }
 
+class CustomPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
+  const CustomPersistentHeaderDelegate({
+    required this.height,
+    required this.child,
+  });
+  final double height;
+  final Widget child;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return Container(height: height, color: Colors.white, child: child);
+  }
+
+  @override
+  double get maxExtent => height;
+
+  @override
+  double get minExtent => height;
+
+  @override
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) {
+    return false;
+  }
+}
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -66,35 +95,54 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    const toolbarHeight = 80.0;
+    const appBarHeight = 50.0;
+    const toolbarHeight = 40.0;
+    const greenHeight = 100.0;
+
+    final pinnedFlexibleSpaceBarHeight =
+        greenHeight + appBarHeight + MediaQuery.of(context).padding.top * 2;
+    final pinnedToolbarHeight = pinnedFlexibleSpaceBarHeight + toolbarHeight;
 
     return Scaffold(
-      body: SafeArea(
-        child: NestedScrollView(
-          controller: scrollController,
-          scrollDirection: Axis.vertical,
-          //floatHeaderSlivers: true,
-          headerSliverBuilder: (context, collapsed) {
-            final nestedScrollViewState =
-                context.findAncestorStateOfType<NestedScrollViewState>();
-            final innerScrollController =
-                nestedScrollViewState?.innerController;
-            return [
-              SliverToBoxAdapter(
-                child: Container(
-                  height: 400,
-                  color: Colors.red,
+      body: NestedScrollView(
+        controller: scrollController,
+        scrollDirection: Axis.vertical,
+        //floatHeaderSlivers: true,
+
+        headerSliverBuilder: (context, collapsed) {
+          return [
+            SliverAppBar(
+              automaticallyImplyLeading: false,
+              toolbarHeight: appBarHeight,
+              collapsedHeight: appBarHeight,
+              pinned: true,
+              backgroundColor: Colors.yellow,
+              expandedHeight: MediaQuery.of(context).size.width,
+              flexibleSpace: FlexibleSpaceBar(
+                title: const Text('Title'),
+                collapseMode: CollapseMode.pin,
+                background: Container(
+                  color: Colors.blue,
                 ),
               ),
-              SliverAppBar(
-                pinned: true,
-                scrolledUnderElevation: 0.0,
-                toolbarHeight: toolbarHeight,
-                flexibleSpace: Padding(
+            ),
+            SliverToBoxAdapter(
+              child: Container(height: 300, color: Colors.red),
+            ),
+            SliverAppBar(
+              pinned: true,
+              toolbarHeight: greenHeight,
+              scrolledUnderElevation: 0,
+              flexibleSpace: Container(color: Colors.green),
+            ),
+            SliverPersistentHeader(
+              pinned: true,
+              delegate: CustomPersistentHeaderDelegate(
+                height: toolbarHeight,
+                child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Center(
                     child: MMScrollableTabsBar<String>(
-                      scrollController: innerScrollController,
                       controller: controller,
                       buildTabWidget: (tab, active) {
                         return Container(
@@ -113,66 +161,60 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               ),
-            ];
-          },
-          body: Builder(
-            builder: (context) {
-              final nestedScrollViewState =
-                  context.findAncestorStateOfType<NestedScrollViewState>();
-              final innerScrollController =
-                  nestedScrollViewState?.innerController;
-
-              return MMScrollableTabsBody<String>(
-                controller: controller,
-                scrollController: innerScrollController,
-                toolbarOffset: toolbarHeight,
-                buildContentWidget: (tab, active) {
-                  return Column(
-                    key: tab.globalKey,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          left: 16.0,
-                          right: 16.0,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              tab.label,
-                              style: TextStyle(
-                                color: active ? Colors.red : Colors.black,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                if (tab.key == 'key_1') {
-                                  print('Tab 1');
-                                }
-                              },
-                              child: const Text('Button'),
-                            )
-                          ],
-                        ),
+            ),
+          ];
+        },
+        body: Builder(
+          builder: (context) {
+            return MMNestedScrollableTabsBody<String>(
+              controller: controller,
+              pinnedToolbarHeight: pinnedToolbarHeight,
+              buildContentWidget: (tab, active) {
+                return Column(
+                  key: tab.globalKey,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        left: 16.0,
+                        right: 16.0,
                       ),
-                      for (final color in Colors.primaries.take(8))
-                        Container(
-                          height: 34.0,
-                          color: color,
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 16.0,
-                            vertical: 4.0,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            tab.label,
+                            style: TextStyle(
+                              color: active ? Colors.red : Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                          child: Center(child: Text(color.toString())),
+                          TextButton(
+                            onPressed: () {
+                              if (tab.key == 'key_1') {
+                                print('Tab 1');
+                              }
+                            },
+                            child: const Text('Button'),
+                          )
+                        ],
+                      ),
+                    ),
+                    for (final color in Colors.primaries.take(8))
+                      Container(
+                        height: 34.0,
+                        color: color,
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 16.0,
+                          vertical: 4.0,
                         ),
-                    ],
-                  );
-                },
-              );
-            },
-          ),
+                        child: Center(child: Text(color.toString())),
+                      ),
+                  ],
+                );
+              },
+            );
+          },
         ),
       ),
     );

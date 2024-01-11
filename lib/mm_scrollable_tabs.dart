@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 part 'src/mm_scrollable_tabs_bar.dart';

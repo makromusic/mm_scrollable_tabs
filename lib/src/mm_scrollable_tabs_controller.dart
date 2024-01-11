@@ -9,6 +9,22 @@ class MMScrollableTabsItem<T> {
   final T key;
   final String label;
   final GlobalKey globalKey;
+
+  @override
+  String toString() => 'MMScrollableTabsItem(label: $label, key: $key)';
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is MMScrollableTabsItem<T> &&
+        other.label == label &&
+        other.key == key &&
+        other.globalKey == globalKey;
+  }
+
+  @override
+  int get hashCode => label.hashCode ^ key.hashCode ^ globalKey.hashCode;
 }
 
 class MMScrollableTabsController<T> extends ChangeNotifier {
@@ -21,8 +37,8 @@ class MMScrollableTabsController<T> extends ChangeNotifier {
   final List<MMScrollableTabsItem<T>> tabs;
   final void Function(MMScrollableTabsItem<T> tab)? onTabActive;
 
-  late final _MMScrollableTabsBarState? _tabBarState;
-  late final _MMScrollableTabsBodyState? _bodyState;
+  _MMScrollableTabsBarState? _tabBarState;
+  _MMNestedScrollableTabsBodyState? _bodyState;
 
   void _autoScrollToTab(MMScrollableTabsItem<T> tab) {
     _checkDisposed();
