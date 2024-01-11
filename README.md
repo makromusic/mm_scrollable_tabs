@@ -1,39 +1,20 @@
-<!--
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
-
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/guides/libraries/writing-package-pages).
-
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-library-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/developing-packages).
--->
-
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
 
 ## Features
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+**Simple Scroll View Example**
 
-## Getting started
+[Sample Code](simple_scroll_example/lib/main.dart)
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+https://github.com/makromusic/mm_scrollable_tabs/assets/47090675/3709ff81-3278-4f0f-8db9-5e050e63f5fa
 
-## Usage
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
+**Nested Scroll View Example**
 
-```dart
-const like = 'sample';
-```
+[Sample Code](nested_scroll_example/lib/main.dart)
 
-## Additional information
+https://github.com/makromusic/mm_scrollable_tabs/assets/47090675/209277f3-4d15-4a9b-bf7a-878f7a245496
 
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
+
+
+
+
