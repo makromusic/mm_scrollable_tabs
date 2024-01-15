@@ -82,6 +82,7 @@ class MMScrollableTabsController<T> {
     if (!_disposed) {
       _disposed = true;
       // dispose global keys
+      this._listeners.clear();
       this._bodyState = null;
       this._tabBarState = null;
     }
