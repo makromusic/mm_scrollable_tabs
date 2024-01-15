@@ -27,18 +27,38 @@ class MMScrollableTabsItem<T> {
   int get hashCode => label.hashCode ^ key.hashCode ^ globalKey.hashCode;
 }
 
-class MMScrollableTabsController<T> extends ChangeNotifier {
+typedef MMScrollableTabsControllerListener<T> = void Function(
+  MMScrollableTabsItem<T> tab,
+);
+
+class MMScrollableTabsController<T> {
   MMScrollableTabsController({
     required this.tabs,
-    required this.onTabActive,
   })  : assert(tabs.isNotEmpty),
         assert(tabs.map((e) => e.key).toSet().length == tabs.length);
 
   final List<MMScrollableTabsItem<T>> tabs;
-  final void Function(MMScrollableTabsItem<T> tab)? onTabActive;
 
+  final List<MMScrollableTabsControllerListener<T>> _listeners = [];
   _MMScrollableTabsBarState? _tabBarState;
   _MMNestedScrollableTabsBodyState? _bodyState;
+
+  void addListener(MMScrollableTabsControllerListener<T> listener) {
+    _checkDisposed();
+    _listeners.add(listener);
+  }
+
+  void removeListener(MMScrollableTabsControllerListener<T> listener) {
+    _checkDisposed();
+    _listeners.remove(listener);
+  }
+
+  void _notifyListeners(MMScrollableTabsItem<T> tab) {
+    _checkDisposed();
+    for (final listener in _listeners) {
+      listener(tab);
+    }
+  }
 
   void _autoScrollToTab(MMScrollableTabsItem<T> tab) {
     _checkDisposed();
@@ -58,14 +78,12 @@ class MMScrollableTabsController<T> extends ChangeNotifier {
     }
   }
 
-  @override
   void dispose() {
     if (!_disposed) {
       _disposed = true;
       // dispose global keys
       this._bodyState = null;
       this._tabBarState = null;
-      super.dispose();
     }
   }
 }

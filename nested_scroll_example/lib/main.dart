@@ -76,12 +76,11 @@ class _HomePageState extends State<HomePage> {
         MMScrollableTabsItem(label: 'Tab $i', key: 'key_$i'),
     ];
 
-    controller = MMScrollableTabsController<String>(
-      onTabActive: (tab) {
-        print('Tab active ${tab.key} with index ${tabs.indexOf(tab)}');
-      },
-      tabs: tabs,
-    );
+    controller = MMScrollableTabsController<String>(tabs: tabs);
+
+    controller.addListener((tab) {
+      debugPrint('Tab active ${tab.key} with index ${tabs.indexOf(tab)}');
+    });
 
     super.initState();
   }
@@ -192,7 +191,7 @@ class _HomePageState extends State<HomePage> {
                           TextButton(
                             onPressed: () {
                               if (tab.key == 'key_1') {
-                                print('Tab 1');
+                                debugPrint('Tab 1');
                               }
                             },
                             child: const Text('Button'),

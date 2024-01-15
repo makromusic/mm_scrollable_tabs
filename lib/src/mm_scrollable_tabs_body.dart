@@ -110,7 +110,7 @@ class _MMNestedScrollableTabsBodyState<T>
         (_) {
           if (!mounted) return;
           setState(() => autoScrolling = false);
-          widget.controller.onTabActive?.call(tab);
+          widget.controller._notifyListeners(tab);
         },
       );
     } else {
@@ -126,7 +126,7 @@ class _MMNestedScrollableTabsBodyState<T>
         (_) {
           if (!mounted) return;
           setState(() => autoScrolling = false);
-          widget.controller.onTabActive?.call(tab);
+          widget.controller._notifyListeners(tab);
         },
       );
     }
@@ -153,7 +153,7 @@ class _MMNestedScrollableTabsBodyState<T>
     setState(() => active = closestTab);
     widget.controller._setActiveTabForTabBar(closestTab!);
     if (!autoScrolling) {
-      widget.controller.onTabActive?.call(closestTab!);
+      widget.controller._notifyListeners(closestTab!);
     }
   }
 
