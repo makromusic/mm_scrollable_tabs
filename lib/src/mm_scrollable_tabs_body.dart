@@ -52,6 +52,7 @@ class _MMNestedScrollableTabsBodyState<T>
     );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       setState(() => initialTopOffsets = calculateOffsets());
       calculateLastContentHeight();
       activeTabListener();
@@ -76,6 +77,7 @@ class _MMNestedScrollableTabsBodyState<T>
         ?.findRenderObject() as RenderBox?;
     final height = renderBox?.size.height;
     if (height != null) {
+      if (!mounted) return;
       setState(() => lastContentHeight = height);
     }
   }
@@ -87,6 +89,7 @@ class _MMNestedScrollableTabsBodyState<T>
   }
 
   void autoAnimateToTab(MMScrollableTabsItem<T> tab) {
+    if (!mounted) return;
     if (nestedScrollViewState == null) return;
     if (initialTopOffsets[tab] == null) return;
 
@@ -105,6 +108,7 @@ class _MMNestedScrollableTabsBodyState<T>
       )
           .then(
         (_) {
+          if (!mounted) return;
           setState(() => autoScrolling = false);
           widget.controller.onTabActive?.call(tab);
         },
@@ -120,6 +124,7 @@ class _MMNestedScrollableTabsBodyState<T>
       )
           .then(
         (_) {
+          if (!mounted) return;
           setState(() => autoScrolling = false);
           widget.controller.onTabActive?.call(tab);
         },
@@ -144,6 +149,7 @@ class _MMNestedScrollableTabsBodyState<T>
 
     if (closestTab == null) return;
 
+    if (!mounted) return;
     setState(() => active = closestTab);
     widget.controller._setActiveTabForTabBar(closestTab!);
     if (!autoScrolling) {

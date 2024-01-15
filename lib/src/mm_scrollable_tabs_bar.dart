@@ -50,6 +50,7 @@ class _MMScrollableTabsBarState<T> extends State<MMScrollableTabsBar<T>> {
   }
 
   void setActiveTab(MMScrollableTabsItem<T> active) {
+    if (!mounted) return;
     setState(() => this.active = active);
   }
 
