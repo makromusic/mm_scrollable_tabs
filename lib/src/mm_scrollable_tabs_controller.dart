@@ -2,29 +2,26 @@ part of '../mm_scrollable_tabs.dart';
 
 class MMScrollableTabsItem<T> {
   MMScrollableTabsItem({
-    required this.label,
     required this.key,
-  }) : globalKey = GlobalKey();
+  }) : _globalKey = GlobalKey();
 
   final T key;
-  final String label;
-  final GlobalKey globalKey;
+  final GlobalKey _globalKey;
 
   @override
-  String toString() => 'MMScrollableTabsItem(label: $label, key: $key)';
+  String toString() => 'MMScrollableTabsItem(key: $key)';
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
 
     return other is MMScrollableTabsItem<T> &&
-        other.label == label &&
         other.key == key &&
-        other.globalKey == globalKey;
+        other._globalKey == _globalKey;
   }
 
   @override
-  int get hashCode => label.hashCode ^ key.hashCode ^ globalKey.hashCode;
+  int get hashCode => key.hashCode ^ _globalKey.hashCode;
 }
 
 typedef MMScrollableTabsControllerListener<T> = void Function(
@@ -34,8 +31,7 @@ typedef MMScrollableTabsControllerListener<T> = void Function(
 class MMScrollableTabsController<T> {
   MMScrollableTabsController({
     required this.tabs,
-  })  : assert(tabs.isNotEmpty),
-        assert(tabs.map((e) => e.key).toSet().length == tabs.length);
+  }) : assert(tabs.map((e) => e.key).toSet().length == tabs.length);
 
   final List<MMScrollableTabsItem<T>> tabs;
 

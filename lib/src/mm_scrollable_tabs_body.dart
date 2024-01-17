@@ -16,10 +16,7 @@ class MMNestedScrollableTabsBody<T> extends StatefulWidget {
   final double pinnedToolbarHeight;
   final Curve curve;
   final Duration duration;
-  final Widget? Function(
-    MMScrollableTabsItem<T> tab,
-    bool active,
-  ) buildContentWidget;
+  final Widget? Function(T key, bool active) buildContentWidget;
 
   @override
   State<MMNestedScrollableTabsBody> createState() =>
@@ -73,7 +70,8 @@ class _MMNestedScrollableTabsBodyState<T>
   }
 
   void calculateLastContentHeight() {
-    final renderBox = widget.controller.tabs.last.globalKey.currentContext
+    if (widget.controller.tabs.isEmpty) return;
+    final renderBox = widget.controller.tabs.last._globalKey.currentContext
         ?.findRenderObject() as RenderBox?;
     final height = renderBox?.size.height;
     if (height != null) {
@@ -89,6 +87,8 @@ class _MMNestedScrollableTabsBodyState<T>
   }
 
   void autoAnimateToTab(MMScrollableTabsItem<T> tab) {
+    assert(widget.controller.tabs.isNotEmpty);
+
     if (!mounted) return;
     if (nestedScrollViewState == null) return;
     if (initialTopOffsets[tab] == null) return;
@@ -158,9 +158,10 @@ class _MMNestedScrollableTabsBodyState<T>
   }
 
   Map<MMScrollableTabsItem<T>, double> calculateOffsets() {
+    if (widget.controller.tabs.isEmpty) return {};
     final topOffsets = <MMScrollableTabsItem<T>, double>{};
     for (final tab in widget.controller.tabs) {
-      final offset = findTopOffset(tab.globalKey);
+      final offset = findTopOffset(tab._globalKey);
       if (offset == null) continue;
       topOffsets[tab] = offset;
     }
@@ -173,13 +174,13 @@ class _MMNestedScrollableTabsBodyState<T>
       builder: (context, constraints) {
         final slivers = widget.controller.tabs.map((tab) {
           Widget? child = widget.buildContentWidget(
-            tab,
-            active?.globalKey == tab.globalKey,
+            tab.key,
+            active?._globalKey == tab._globalKey,
           );
 
           child ??= const SizedBox();
 
-          return SliverToBoxAdapter(child: child);
+          return SliverToBoxAdapter(key: tab._globalKey, child: child);
         }).toList();
 
         final height = constraints.maxHeight -

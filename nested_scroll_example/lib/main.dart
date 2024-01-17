@@ -72,8 +72,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     scrollController = ScrollController();
     final tabs = [
-      for (int i = 1; i <= 10; i++)
-        MMScrollableTabsItem(label: 'Tab $i', key: 'key_$i'),
+      for (int i = 1; i <= 10; i++) MMScrollableTabsItem(key: 'key_$i'),
     ];
 
     controller = MMScrollableTabsController<String>(tabs: tabs);
@@ -143,7 +142,7 @@ class _HomePageState extends State<HomePage> {
                   child: Center(
                     child: MMScrollableTabsBar<String>(
                       controller: controller,
-                      buildTabWidget: (tab, active) {
+                      buildTabWidget: (key, active) {
                         return Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 16.0,
@@ -153,7 +152,7 @@ class _HomePageState extends State<HomePage> {
                             color: active ? Colors.red : Colors.transparent,
                             borderRadius: BorderRadius.circular(4.0),
                           ),
-                          child: Text(tab.label),
+                          child: Text(key),
                         );
                       },
                     ),
@@ -168,9 +167,8 @@ class _HomePageState extends State<HomePage> {
             return MMNestedScrollableTabsBody<String>(
               controller: controller,
               pinnedToolbarHeight: pinnedToolbarHeight,
-              buildContentWidget: (tab, active) {
+              buildContentWidget: (key, active) {
                 return Column(
-                  key: tab.globalKey,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
@@ -182,7 +180,7 @@ class _HomePageState extends State<HomePage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            tab.label,
+                            key,
                             style: TextStyle(
                               color: active ? Colors.red : Colors.black,
                               fontWeight: FontWeight.bold,
@@ -190,7 +188,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                           TextButton(
                             onPressed: () {
-                              if (tab.key == 'key_1') {
+                              if (key == 'key_1') {
                                 debugPrint('Tab 1');
                               }
                             },

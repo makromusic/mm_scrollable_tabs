@@ -12,10 +12,7 @@ class MMScrollableTabsBar<T> extends StatefulWidget {
   final MMScrollableTabsController<T> controller;
   final double firstItemLeftPadding;
   final double lastItemRightPadding;
-  final Widget Function(
-    MMScrollableTabsItem<T> tab,
-    bool active,
-  ) buildTabWidget;
+  final Widget Function(T key, bool active) buildTabWidget;
 
   @override
   State<MMScrollableTabsBar<T>> createState() => _MMScrollableTabsBarState<T>();
@@ -71,21 +68,16 @@ class _MMScrollableTabsBarState<T> extends State<MMScrollableTabsBar<T>> {
   @override
   Widget build(BuildContext context) {
     final children = <Widget>[];
-    children.add(
-      SizedBox(width: widget.firstItemLeftPadding),
-    );
+
+    children.add(SizedBox(width: widget.firstItemLeftPadding));
     children.addAll(widget.controller.tabs.map((tab) {
       return GestureDetector(
-        onTap: () {
-          widget.controller._autoScrollToTab(tab);
-        },
-        child: widget.buildTabWidget(tab, active?.key == tab.key),
+        onTap: () => widget.controller._autoScrollToTab(tab),
+        child: widget.buildTabWidget(tab.key, active?.key == tab.key),
       );
     }).toList());
+    children.add(SizedBox(width: widget.lastItemRightPadding));
 
-    children.add(
-      SizedBox(width: widget.lastItemRightPadding),
-    );
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       controller: tabScrollController,
