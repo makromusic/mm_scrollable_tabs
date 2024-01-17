@@ -180,7 +180,9 @@ class _MMNestedScrollableTabsBodyState<T>
 
           child ??= const SizedBox();
 
-          return SliverToBoxAdapter(key: tab._globalKey, child: child);
+          return SliverToBoxAdapter(
+            child: SizedBox(key: tab._globalKey, child: child),
+          );
         }).toList();
 
         final height = constraints.maxHeight -
