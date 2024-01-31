@@ -25,8 +25,6 @@ class MMNestedScrollableTabsBody<T> extends StatefulWidget {
 
 class _MMNestedScrollableTabsBodyState<T>
     extends State<MMNestedScrollableTabsBody<T>> with WidgetsBindingObserver {
-  late Map<MMScrollableTabsItem<T>, double> initialTopOffsets;
-
   double? lastContentHeight;
   bool autoScrolling = false;
 
@@ -50,7 +48,6 @@ class _MMNestedScrollableTabsBodyState<T>
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      setState(() => initialTopOffsets = calculateOffsets());
       calculateLastContentHeight();
       activeTabListener();
     });
@@ -91,12 +88,14 @@ class _MMNestedScrollableTabsBodyState<T>
 
     if (!mounted) return;
     if (nestedScrollViewState == null) return;
-    if (initialTopOffsets[tab] == null) return;
+
+    final topOffsets = calculateOffsets();
+    if (topOffsets[tab] == null) return;
 
     setState(() => autoScrolling = true);
 
-    final minInitialTopOffset = initialTopOffsets.values.reduce(min);
-    final normalizedOffset = initialTopOffsets[tab]! - minInitialTopOffset;
+    final minTopOffset = topOffsets.values.reduce(min);
+    final normalizedOffset = topOffsets[tab]! - minTopOffset;
     final offset = normalizedOffset - widget.pinnedToolbarHeight;
 
     if (offset >= 0) {
