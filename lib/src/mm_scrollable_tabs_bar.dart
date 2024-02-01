@@ -53,6 +53,8 @@ class _MMScrollableTabsBarState<T> extends State<MMScrollableTabsBar<T>> {
 
   void contentScrollToTabScrollListener() {
     final scrollController = nestedScrollViewState!.innerController;
+    if (scrollController.positions.length != 1) return;
+    
     final maxContentOffset = scrollController.position.maxScrollExtent;
     final maxTabOffset = tabScrollController.position.maxScrollExtent;
 
