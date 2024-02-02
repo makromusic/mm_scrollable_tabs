@@ -18,7 +18,8 @@ class MMScrollableTabsBar<T> extends StatefulWidget {
   State<MMScrollableTabsBar<T>> createState() => _MMScrollableTabsBarState<T>();
 }
 
-class _MMScrollableTabsBarState<T> extends State<MMScrollableTabsBar<T>> {
+class _MMScrollableTabsBarState<T> extends State<MMScrollableTabsBar<T>>
+    with WidgetsBindingObserver {
   late final ScrollController tabScrollController;
   bool autoScrolling = false;
   MMScrollableTabsItem<T>? active;
@@ -26,6 +27,8 @@ class _MMScrollableTabsBarState<T> extends State<MMScrollableTabsBar<T>> {
 
   @override
   void initState() {
+    WidgetsBinding.instance.addObserver(this);
+
     tabScrollController = ScrollController();
     widget.controller._tabBarState = this;
     nestedScrollViewState =
@@ -33,6 +36,16 @@ class _MMScrollableTabsBarState<T> extends State<MMScrollableTabsBar<T>> {
     nestedScrollViewState?.innerController.addListener(
       contentScrollToTabScrollListener,
     );
+
+    active = widget.controller.tabs.firstOrNull;
+    if (widget.controller._bodyState != null) {
+      //* It means that this code block is only executed if the body state is already initialized (while changing the parent tab bar)
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (active != null) {
+          widget.controller._autoScrollToTab(active!);
+        }
+      });
+    }
 
     super.initState();
   }
@@ -43,6 +56,7 @@ class _MMScrollableTabsBarState<T> extends State<MMScrollableTabsBar<T>> {
       contentScrollToTabScrollListener,
     );
     tabScrollController.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -54,7 +68,7 @@ class _MMScrollableTabsBarState<T> extends State<MMScrollableTabsBar<T>> {
   void contentScrollToTabScrollListener() {
     final scrollController = nestedScrollViewState!.innerController;
     if (scrollController.positions.length != 1) return;
-    
+
     final maxContentOffset = scrollController.position.maxScrollExtent;
     final maxTabOffset = tabScrollController.position.maxScrollExtent;
 
