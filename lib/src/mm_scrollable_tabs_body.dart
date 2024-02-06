@@ -27,6 +27,7 @@ class _MMNestedScrollableTabsBodyState<T>
     extends State<MMNestedScrollableTabsBody<T>> with WidgetsBindingObserver {
   double? lastContentHeight;
   bool autoScrolling = false;
+  bool innerScrolling = false;
 
   MMScrollableTabsItem<T>? active;
   NestedScrollViewState? nestedScrollViewState;
@@ -41,9 +42,12 @@ class _MMNestedScrollableTabsBodyState<T>
     nestedScrollViewState?.innerController.addListener(
       activeTabListener,
     );
+    nestedScrollViewState?.innerController.addListener(
+      activeTabListener,
+    );
 
     nestedScrollViewState?.outerController.addListener(
-      activeTabListener,
+      _innerScrollingListener,
     );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -66,6 +70,10 @@ class _MMNestedScrollableTabsBodyState<T>
     super.dispose();
   }
 
+  void _innerScrollingListener() {
+    setState(() => innerScrolling = true);
+  }
+
   void calculateLastContentHeight() {
     if (widget.controller.tabs.isEmpty) return;
     final renderBox = widget.controller.tabs.last._globalKey.currentContext
@@ -84,6 +92,7 @@ class _MMNestedScrollableTabsBodyState<T>
   }
 
   void autoAnimateToTab(MMScrollableTabsItem<T> tab) {
+    return;
     assert(widget.controller.tabs.isNotEmpty);
 
     if (!mounted) return;
@@ -167,6 +176,8 @@ class _MMNestedScrollableTabsBodyState<T>
     return topOffsets;
   }
 
+  static const kTabBarHeight = 56.0;
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -179,24 +190,119 @@ class _MMNestedScrollableTabsBodyState<T>
 
           child ??= const SizedBox();
 
-          return SliverToBoxAdapter(
-            child: SizedBox(key: tab._globalKey, child: child),
-          );
+          return SizedBox(key: tab._globalKey, child: child);
         }).toList();
 
         final height = constraints.maxHeight -
             (lastContentHeight ?? 0) -
-            widget.pinnedToolbarHeight;
+            widget.pinnedToolbarHeight -
+            kTabBarHeight;
 
         if (height > 0) {
-          slivers.add(SliverToBoxAdapter(child: SizedBox(height: height)));
+          slivers.add(SizedBox(height: height));
         }
+        dev.log('pinning toolbar height: ${widget.pinnedToolbarHeight}');
+        dev.log('innerScrolling: ${innerScrolling}');
+        return Padding(
+          padding: EdgeInsets.only(top: 0),
+          // innerScrolling ? widget.pinnedToolbarHeight :
+          child: CustomScrollView(
+            physics: widget.physics,
+            slivers: [
+              SliverOverlapInjector(
+                handle:
+                    NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+              ),
+              SliverStickyHeader(
+                header: MMScrollableTabsBar(
+                  controller: widget.controller,
+                  firstItemLeftPadding: 12,
+                  lastItemRightPadding: 12,
+                  buildTabWidget: (key, active) {
+                    final String label = "labeeell";
 
-        return CustomScrollView(
-          physics: widget.physics,
-          slivers: slivers,
+                    return Container(
+                      height: kTabBarHeight,
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      margin: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 4,
+                      ),
+                      decoration: BoxDecoration(
+                          color: active ? Colors.red : Colors.blue,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: active ? Colors.blue : Colors.red,
+                          )),
+                      child: Center(
+                        child: Text(
+                          label,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate.fixed(
+                    slivers,
+                  ),
+                ),
+              ),
+            ],
+          ),
         );
       },
     );
+  }
+}
+
+class _Delegate extends SliverPersistentHeaderDelegate {
+  const _Delegate(
+    this.backgroundColor,
+    this.child,
+    this.context,
+    this.headerHeight,
+    this.showShadow,
+  );
+
+  final Color backgroundColor;
+  final Widget child;
+  final BuildContext context;
+  final double headerHeight;
+  final bool showShadow;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        boxShadow: showShadow
+            ? [
+                BoxShadow(
+                  offset: const Offset(0, 2),
+                  blurRadius: 10,
+                  color: Colors.black.withOpacity(0.07),
+                ),
+              ]
+            : null,
+      ),
+      child: child,
+    );
+  }
+
+  @override
+  double get maxExtent => headerHeight;
+
+  @override
+  double get minExtent => headerHeight;
+
+  @override
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) {
+    return true;
   }
 }
